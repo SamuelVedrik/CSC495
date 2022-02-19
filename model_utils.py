@@ -31,11 +31,11 @@ class VGGWrapper(nn.Module):
 class LinearBlock(nn.Module): 
     def __init__(self, in_features, out_features, activation, final_loss=True): 
         super().__init__()
-        self.block = nn.Sequential([
+        self.block = nn.Sequential(
             nn.Linear(in_features, out_features),
             activation(),
             nn.BatchNorm1d(out_features),
-        ])
+        )
         
     def forward(self, x): 
         return self.block(x)
