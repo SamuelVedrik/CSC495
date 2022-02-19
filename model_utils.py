@@ -1,6 +1,6 @@
 from torchvision.models import vgg11
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
