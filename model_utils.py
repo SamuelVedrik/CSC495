@@ -2,8 +2,11 @@ from torchvision.models import vgg11
 import torch.nn as nn
 import torch.functional as F
 import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader
 import numpy as np
 from constants import DEVICE
+from tqdm.auto import tqdm
 
 class VGGWrapper(nn.Module):
     def __init__(self, base: nn.Module, num_out: int):
@@ -27,6 +30,25 @@ class VGGWrapper(nn.Module):
         latent = self.vgg.features(x)
         return self.vgg.avgpool(latent)
     
+
+def get_latent_variables(model, datasets):
+    latent_variables = {}
+    for name, dataset in datasets.items():
+        small = dataset.split_dataset(num_per_class=100, seed=495)
+        dataloader = DataLoader(small, batch_size=16, shuffle=False)
+        reps_all = []
+        labels_all = []
+        print(name)
+        for images, labels in tqdm(dataloader):
+            images = images.to(DEVICE)
+            rep = model.latent_vars(images).detach().cpu()
+            reps_all.append(rep)
+            labels_all.append(labels)
+            torch.cuda.empty_cache()
+    
+        reps_all = torch.cat(reps_all, axis=0)
+        labels_all = torch.cat(labels_all, axis=0)
+        latent_variables[name] = (reps_all, labels_all)
 
 class LinearBlock(nn.Module): 
     def __init__(self, in_features, out_features, activation, final_loss=True): 
@@ -89,7 +111,28 @@ class VAE(nn.Module):
 
             return self.encoder(x)[:, :self.dim_red].cpu().numpy()
         
-def center_loss(mu, labels, num_classes):
-    
+# ======== TRAINING AUTO ENCODER ============ 
+
+def criterion(pred, mu, logvar, target, labels, num_classes=10):
+    mse_loss = F.mse_loss(pred, target, reduction="sum")
+    KL_divergence = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     centers = torch.stack([mu[labels == i].mean(axis=0) for i in range(num_classes)])
-    return F.mse_loss(mu, centers[labels], reduction="sum")
+    center_loss = F.mse_loss(mu, centers[labels], reduction="sum")
+    return mse_loss + KL_divergence + center_loss
+
+def train_encoder_single_loop(encoder, representations, labels, optimizer):
+    pred, mu, logvar = encoder(representations)
+    loss = criterion(pred, mu, logvar, representations, labels)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+    return loss.item()
+
+def train_encoder(encoder, representations, labels, epochs=1000):
+    optimizer = optim.Adam(encoder.parameters())
+    losses = []
+    for epoch in tqdm(range(epochs)):
+        loss = train_encoder_single_loop(encoder, representations, labels, optimizer)
+        losses.append(loss)
+
+    return losses
