@@ -31,10 +31,10 @@ class VGGWrapper(nn.Module):
         return self.vgg.avgpool(latent)
     
 
-def get_latent_variables(model, datasets):
+def get_latent_variables(model, datasets, num_per_class=100, seed=495):
     latent_variables = {}
     for name, dataset in datasets.items():
-        small = dataset.split_dataset(num_per_class=100, seed=495)
+        small = dataset.split_dataset(num_per_class=num_per_class, seed=seed)
         dataloader = DataLoader(small, batch_size=16, shuffle=False)
         reps_all = []
         labels_all = []
@@ -49,6 +49,7 @@ def get_latent_variables(model, datasets):
         reps_all = torch.cat(reps_all, axis=0)
         labels_all = torch.cat(labels_all, axis=0)
         latent_variables[name] = (reps_all, labels_all)
+    return latent_variables
 
 class LinearBlock(nn.Module): 
     def __init__(self, in_features, out_features, activation, final_loss=True): 
