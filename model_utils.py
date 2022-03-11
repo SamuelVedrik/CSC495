@@ -24,6 +24,11 @@ class VGGWrapper(nn.Module):
     def forward(self, x):
         return self.vgg(x)
     
+    def freeze_layers(self):
+        for param in self.vgg.features.parameters():
+            param.require_grad = False
+        
+    
     def latent_vars(self, x):
         # Get the features fed into the linear classifier.
         latent = self.vgg.features(x)
