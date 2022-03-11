@@ -1,4 +1,3 @@
-from torchvision.models import vgg11
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
@@ -7,7 +6,7 @@ from torch.utils.data import DataLoader
 import numpy as np
 from constants import DEVICE
 from tqdm.auto import tqdm
-
+from collections import defaultdict
 class VGGWrapper(nn.Module):
     def __init__(self, base: nn.Module, num_out: int):
         super().__init__()
@@ -29,7 +28,33 @@ class VGGWrapper(nn.Module):
         # Get the features fed into the linear classifier.
         latent = self.vgg.features(x)
         return self.vgg.avgpool(latent)
+
+class VGGBlocksWrapper(VGGWrapper):
     
+    ## https://pytorch.org/vision/stable/_modules/torchvision/models/vgg.html#vgg11
+    ## Part of cfs["A"], where each numeric denotes a conv and ReLU layer, and a "M" denotes maxpool.
+    BLOCKS = [0, 0, 0, 
+              1, 1, 1,
+              2, 2, 2, 2, 2,
+              3, 3, 3, 3, 3,
+              4, 4, 4, 4, 4]
+    def __init__(self, base, num_out: int):
+        super().__init__(base, num_out)
+        self.vgg_layers = defaultdict(list)
+
+        for layer, block_id in zip(self.vgg_features.children(), self.BLOCKS):
+            self.vgg_layers[block_id].append(layer)
+    
+    def get_from_block(self, x: torch.Tensor, block: int):
+        modules = []
+        for block_id in range(block+1):
+            modules.extend(self.vgg_layers[block_id])
+        
+        layer = nn.Sequential(*modules)    
+        result = layer(x)
+        result = self.vgg.avgpool(result)
+        return result
+
 
 def get_latent_variables(model, datasets, num_per_class=100, seed=495):
     latent_variables = {}
