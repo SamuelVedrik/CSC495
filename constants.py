@@ -1,7 +1,7 @@
 from torchvision import transforms
 import torch
 
-RESIZE = transforms.Resize((224, 224))
+RESIZE = transforms.Resize((128, 128))
 
 NORMALIZE = transforms.Normalize(
     mean=[0.485, 0.456, 0.406],
