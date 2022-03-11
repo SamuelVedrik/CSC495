@@ -42,7 +42,7 @@ class VGGBlocksWrapper(VGGWrapper):
         super().__init__(base, num_out)
         self.vgg_layers = defaultdict(list)
 
-        for layer, block_id in zip(self.vgg_features.children(), self.BLOCKS):
+        for layer, block_id in zip(self.vgg.features.children(), self.BLOCKS):
             self.vgg_layers[block_id].append(layer)
     
     def get_from_block(self, x: torch.Tensor, block: int):
