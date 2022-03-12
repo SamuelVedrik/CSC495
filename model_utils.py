@@ -81,6 +81,8 @@ def get_latent_variables(model, datasets, num_per_class=100, seed=495):
         latent_variables[name] = (reps_all, labels_all)
     return latent_variables
 
+
+# ======== VARIATIONAL AUTO ENCODER ============ 
 class LinearBlock(nn.Module): 
     def __init__(self, in_features, out_features, activation, final_loss=True): 
         super().__init__()
@@ -142,28 +144,4 @@ class VAE(nn.Module):
 
             return self.encoder(x)[:, :self.dim_red].cpu().numpy()
         
-# ======== TRAINING AUTO ENCODER ============ 
 
-def criterion(pred, mu, logvar, target, labels, num_classes=10):
-    mse_loss = F.mse_loss(pred, target, reduction="sum")
-    KL_divergence = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    centers = torch.stack([mu[labels == i].mean(axis=0) for i in range(num_classes)])
-    center_loss = F.mse_loss(mu, centers[labels], reduction="sum")
-    return mse_loss + KL_divergence + center_loss
-
-def train_encoder_single_loop(encoder, representations, labels, optimizer):
-    pred, mu, logvar = encoder(representations)
-    loss = criterion(pred, mu, logvar, representations, labels)
-    loss.backward()
-    optimizer.step()
-    optimizer.zero_grad()
-    return loss.item()
-
-def train_encoder(encoder, representations, labels, epochs=1000):
-    optimizer = optim.Adam(encoder.parameters())
-    losses = []
-    for epoch in tqdm(range(epochs)):
-        loss = train_encoder_single_loop(encoder, representations, labels, optimizer)
-        losses.append(loss)
-
-    return losses
