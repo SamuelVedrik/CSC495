@@ -51,6 +51,7 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         
         model_frozen.train()
         model_tuned.train()
+        print(f"Training Epoch {epoch}")
         for images, labels in tqdm(train_dataloader):
             images = images.to(DEVICE)
             labels = labels.to(DEVICE)
@@ -70,6 +71,7 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         
         model_frozen.eval()
         model_tuned.eval()
+        print(f"Validation Epoch {epoch}")
         with torch.no_grad():
             for images, labels in tqdm(test_dataloader):
                 images = images.to(DEVICE)
