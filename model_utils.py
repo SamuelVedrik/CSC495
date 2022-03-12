@@ -5,8 +5,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
 from constants import DEVICE
-from tqdm.auto import tqdm
+from tqdm import tqdm
 from collections import defaultdict
+
 class VGGWrapper(nn.Module):
     def __init__(self, base: nn.Module, num_out: int):
         super().__init__()
@@ -26,7 +27,7 @@ class VGGWrapper(nn.Module):
     
     def freeze_layers(self):
         for param in self.vgg.features.parameters():
-            param.require_grad = False
+                param.requires_grad = False
         
     
     def latent_vars(self, x):
