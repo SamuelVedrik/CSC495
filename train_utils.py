@@ -27,7 +27,7 @@ def val_classifier_single_loop(model, images, labels, criterion):
 def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dataloader, epochs=40):
     
     frozen_metrics = []
-    tuned_losses = []
+    tuned_metrics = []
     
     optim_frozen = optim.Adam(model_frozen.parameters(), lr=1e-3)
     optim_tuned = optim.Adam([
@@ -90,9 +90,9 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         
         
         frozen_metrics.append([frozen_train_loss, frozen_test_loss, frozen_train_acc, frozen_test_acc])
-        tuned_losses.append([tuned_train_loss, tuned_test_loss, tuned_train_acc, tuned_test_acc])
+        tuned_metrics.append([tuned_train_loss, tuned_test_loss, tuned_train_acc, tuned_test_acc])
     
-    return frozen_metrics, tuned_losses
+    return frozen_metrics, tuned_metrics
 
 # ======= AUTO ENCODER ========== 
 
