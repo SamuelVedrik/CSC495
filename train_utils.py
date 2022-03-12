@@ -14,14 +14,14 @@ def train_classifier_single_loop(model, images, labels, criterion, optimizer):
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
-    acc = accuracy_score(labels, pred.argmax(dim=1).cpu())
+    acc = accuracy_score(labels.cpu(), pred.argmax(dim=1).cpu())
     
     return loss.item() * images.shape[0], acc * images.shape[0]
 
 def val_classifier_single_loop(model, images, labels, criterion):
     pred = model(images)
     loss = criterion(pred, labels)
-    acc = accuracy_score(labels, pred.argmax(dim=1).cpu())
+    acc = accuracy_score(labels.cpu(), pred.argmax(dim=1).cpu())
     return loss.item() * images.shape[0], acc * images.shape[0]
 
 def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dataloader, epochs=40):
