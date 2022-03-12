@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import torch
 import torch.optim as optim
 from constants import DEVICE
-from tqdm.auto import tqdm
+from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 
 
@@ -29,7 +29,7 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
     frozen_metrics = []
     tuned_metrics = []
     
-    optim_frozen = optim.Adam(model_frozen.parameters(), lr=1e-3)
+    optim_frozen = optim.Adam(model_frozen.parameters())
     optim_tuned = optim.Adam([
                           {"params": model_tuned.vgg.features.parameters(), "lr": 1e-5},
                           {"params": model_tuned.vgg.classifier.parameters(), "lr": 1e-3}
@@ -48,7 +48,7 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         tuned_test_loss = 0
         frozen_test_acc = 0
         tuned_test_acc = 0
-        
+
         model_frozen.train()
         model_tuned.train()
         print(f"Training Epoch {epoch}")
@@ -69,8 +69,12 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         frozen_train_acc = frozen_train_acc / len(train_dataloader.dataset)
         tuned_train_acc = tuned_train_acc / len(train_dataloader.dataset)
         
+        print(f"frozen train loss: {frozen_train_loss:.3f} | tuned train loss: {tuned_train_loss:.3f}")
+        print(f"frozen train acc: {frozen_train_acc:.3f} | tuned train acc: {tuned_train_acc:.3f}")
+
         model_frozen.eval()
         model_tuned.eval()
+
         print(f"Validation Epoch {epoch}")
         with torch.no_grad():
             for images, labels in tqdm(test_dataloader):
@@ -89,6 +93,9 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         tuned_test_loss = tuned_test_loss / len(test_dataloader.dataset)
         frozen_test_acc = frozen_test_acc / len(test_dataloader.dataset)
         tuned_test_acc = tuned_test_acc / len(test_dataloader.dataset)
+
+        print(f"frozen test loss: {frozen_test_loss:.3f} | tuned test loss: {tuned_test_loss:.3f}")
+        print(f"frozen test acc: {frozen_test_acc:.3f} | tuned test acc: {tuned_test_acc:.3f}")
         
         
         frozen_metrics.append([frozen_train_loss, frozen_test_loss, frozen_train_acc, frozen_test_acc])
