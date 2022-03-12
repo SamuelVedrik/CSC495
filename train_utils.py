@@ -77,8 +77,8 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
                 images = images.to(DEVICE)
                 labels = labels.to(DEVICE)
                 
-                loss_frozen, acc_frozen += val_classifier_single_loop(model_frozen, images, labels, criterion)
-                loss_tuned, acc_tuned += val_classifier_single_loop(model_tuned, images, labels, criterion)
+                loss_frozen, acc_frozen = val_classifier_single_loop(model_frozen, images, labels, criterion)
+                loss_tuned, acc_tuned = val_classifier_single_loop(model_tuned, images, labels, criterion)
 
                 frozen_test_loss += loss_frozen
                 tuned_test_loss += loss_tuned
