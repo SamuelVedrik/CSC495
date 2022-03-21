@@ -63,6 +63,7 @@ class VGGBlocksWrapper(VGGWrapper):
 
 class ResNetWrapper(nn.Module):
     def __init__(self, base, num_out):
+        super().__init__()
         self.resnet = base
         self.resnet.fc = nn.Linear(in_features=512, out_features=num_out, bias=True)
     
@@ -87,6 +88,7 @@ class ResNetWrapper(nn.Module):
     
 class EffNetWrapper(nn.Module):
     def __init__(self, base, num_out):
+        super().__init__()
         self.effnet = base
         self.effnet.classifier = nn.Sequential(
             nn.Dropout(p=0.3, inplace=True), 
