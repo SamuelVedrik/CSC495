@@ -46,6 +46,8 @@ def plot_encoded_values(representations, labels, dataset, title=""):
     fig.update_layout(
         xaxis_range = [representations[:, 0].min() - abs(representations[:, 0].min() * 0.05), representations[:, 0].max() + abs(representations[:, 0].max() * 0.05)],
         yaxis_range = [representations[:, 1].min() - abs(representations[:, 1].min() * 0.05), representations[:, 1].max() + abs(representations[:, 1].max() * 0.05)],
-        title = title
+        title = title,
+        width=800,
+        height=800
     )
     fig.show()
