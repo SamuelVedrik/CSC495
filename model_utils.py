@@ -61,6 +61,47 @@ class VGGBlocksWrapper(VGGWrapper):
         result = self.vgg.avgpool(result)
         return result
 
+class ResNetWrapper(nn.Module):
+    def __init__(self, base, num_out):
+        self.resnet = base
+        self.resnet.fc = nn.Linear(in_features=512, out_features=num_out, bias=True)
+    
+    def forward(self, x):
+        return self.resnet(x)
+
+    def latent_vars(self, x):
+        # Taken from https://pytorch.org/vision/main/_modules/torchvision/models/resnet.html#resnet34
+        x = self.resnet.conv1(x)
+        x = self.resnet.bn1(x)
+        x = self.resnet.relu(x)
+        x = self.resnet.maxpool(x)
+
+        x = self.resnet.layer1(x)
+        x = self.resnet.layer2(x)
+        x = self.resnet.layer3(x)
+        x = self.resnet.layer4(x)
+
+        x = self.resnet.avgpool(x)
+        x = torch.flatten(x, 1)
+        return x
+    
+class EffNetWrapper(nn.Module):
+    def __init__(self, base, num_out):
+        self.effnet = base
+        self.effnet.classifier = nn.Sequential(
+            nn.Dropout(p=0.3, inplace=True), 
+            nn.Linear(in_features=1408, out_features=num_out, bias=True)
+        )
+        
+    def forward(self, x):
+        return self.effnet(x)
+
+    def latent_vars(self, x):
+        x = self.effnet.features(x)
+        x = self.effnet.avgpool(x)
+        x = torch.flatten(x, 1)
+        return x
+    
 
 def get_latent_variables(model, datasets, num_per_class=100, seed=495):
     latent_variables = {}
