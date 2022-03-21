@@ -31,10 +31,10 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
     
     optim_frozen = optim.Adam(model_frozen.parameters())
     optim_tuned = optim.Adam([
-                          {"params": model_tuned.resnet.layer1.parameters(), "lr": 1e-5},
-                          {"params": model_tuned.resnet.layer2.parameters(), "lr": 1e-5},
-                          {"params": model_tuned.resnet.layer3.parameters(), "lr": 1e-5},
-                          {"params": model_tuned.resnet.layer4.parameters(), "lr": 1e-5},
+                          {"params": model_tuned.resnet.layer1.parameters(), "lr": 1e-4},
+                          {"params": model_tuned.resnet.layer2.parameters(), "lr": 1e-4},
+                          {"params": model_tuned.resnet.layer3.parameters(), "lr": 1e-4},
+                          {"params": model_tuned.resnet.layer4.parameters(), "lr": 1e-4},
                           {"params": model_tuned.resnet.fc.parameters(), "lr": 1e-3}
                           ]
                          )
