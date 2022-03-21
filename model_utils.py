@@ -73,7 +73,7 @@ class ResNetWrapper(nn.Module):
     def freeze_layers(self):
         for name, param in self.resnet.named_parameters():
             if name[:2] != "fc":
-                param.require_grad = False
+                param.requires_grad = False
 
     def latent_vars(self, x):
         # Taken from https://pytorch.org/vision/main/_modules/torchvision/models/resnet.html#resnet34
