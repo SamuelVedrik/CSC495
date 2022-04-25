@@ -103,6 +103,7 @@ def train_frozen_and_tuned(model_frozen, model_tuned, train_dataloader, test_dat
         
         frozen_metrics.append([frozen_train_loss, frozen_test_loss, frozen_train_acc, frozen_test_acc])
         tuned_metrics.append([tuned_train_loss, tuned_test_loss, tuned_train_acc, tuned_test_acc])
+        torch.save(model_tuned.state_dict(), f"./model_tuned_{epoch}.pth")
     
     return frozen_metrics, tuned_metrics
 
