@@ -3,6 +3,7 @@ from constants import INV_NORMALIZE
 from typing import Dict
 import torch
 import plotly.graph_objects as go
+import numpy as np
 
 plt.rcParams["figure.figsize"] = (13, 7)
 
@@ -33,16 +34,30 @@ def showcase_transforms(datasets: Dict, idx=0):
     plt.show()
     
     
-def plot_encoded_values(representations, labels, dataset, title=""):
+def plot_encoded_values(representations, labels, dataset, highlights=None, title=""):
+    if highlights is None:
+        highlights = []
+        
     fig = go.Figure()
     for id, label in dataset.id_to_labels.items():
         points = representations[labels == id]
+        idxs = np.arange(len(dataset))[labels == id]
+        if len(highlights) > 0:
+          opacities = np.full((len(dataset), ), 0.2)
+          opacities[highlights] = 1.0
+          opacities = opacities[labels == id]
+        else:
+          opacities = 1.0
+
         fig.add_trace(go.Scatter(
                     x = points[:, 0],
                     y = points[:, 1],
                     mode="markers",
-                    name = label
+                    name = label,
+                    hovertext = idxs,
+                    marker=dict(opacity= opacities)
             ))
+  
     fig.update_layout(
         xaxis_range = [representations[:, 0].min() - abs(representations[:, 0].min() * 0.05), representations[:, 0].max() + abs(representations[:, 0].max() * 0.05)],
         yaxis_range = [representations[:, 1].min() - abs(representations[:, 1].min() * 0.05), representations[:, 1].max() + abs(representations[:, 1].max() * 0.05)],
